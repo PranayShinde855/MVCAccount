@@ -37,14 +37,20 @@ namespace MVCAccount.Controllers
         [HttpPost]
         public async Task<IActionResult> LoginCookies(LoginDTO loginDTO)
         {
-            if (loginDTO.Username == "Pranay" && loginDTO.Password == "Pranay")
+            if (loginDTO.Username != "Pranay" && loginDTO.Password != "Pranay")
                 return View(loginDTO);
 
-            HttpContext.Session.SetString("Username", loginDTO.Username);
-            HttpContext.Session.SetString("Password", loginDTO.Password);
+            var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Name, loginDTO.Username)
+                };
+            var claimsIdentity = new ClaimsIdentity(claims, "Login");
+
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
+
             return RedirectToAction(nameof(AfterLogin));
         }
-
+            
         public IActionResult AfterLogin()
         {
             return View();
